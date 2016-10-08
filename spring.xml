@@ -9,10 +9,131 @@
     <bean id ="triangle" class="org.roka9.spring.Triangle"/>
     -->
     
-    <!-- 2. Definición extra con propiedad (variable privada a inicializar). -->
+    <!-- 2. Definición extra con propiedad (variable privada a inicializar con setter).
     <bean id ="triangle" class="org.roka9.spring.Triangle">
     	<property name="type" value="equilateral"/>
+    </bean>
+    -->
     
+
+    <bean id="basicTriangle" class="org.roka9.spring.Triangle">
+        <!-- 3. Definición extra con propiedad (variable privada a inicializar con constructor).
+    	 Se encontró un error: Este bloque devolvía java.lang.IllegalArgumentException. Bastó
+    	 con actualizar a Spring 4.3.3.
+    	-->
+    	<!-- Constructor con dos argumentos 
+    	<constructor-arg type="java.lang.String" value="equilateral" />
+    	<constructor-arg type="java.lang.Integer" value="20" />
+    	-->
+    	
+    	<!-- Constructor con un argumento. El tipo debe ser Integer, no se puede recibir int
+    	<constructor-arg type="java.lang.Integer" value="20" />
+    	-->
+    	
+    	<!-- Usando índices. Spring sabe qué constructor usar, dependiendo del número de parámetros proporcionados.
+    		 En este caso, pasamos el orden de los mismo.
+    	-->	     	
+    	<constructor-arg index="0" value="equilateral" />
+    	<constructor-arg index="1" value="20" />   	
     </bean>
     
+    <!-- 4. Inyección de dependencias con objetos (Point -> Triangle). -->
+    
+    <!-- Creamos la configuración necesaria para crear un triángulo usando puntos -->
+    <bean id="pointTriangle" class="org.roka9.spring.Triangle">
+    	<!-- Lo haremos con inyección de dependencias por parámetro -->
+    	<property name="pointA" ref="firstPoint"/>
+    	<property name="pointB" ref="secondPoint"/>
+    	<property name="pointC" ref="thirdPoint"/>
+    	
+    	<!-- Como no teneoms constructor por defecto, es necesario proporcionar argumentos para algún constructor -->
+    	<constructor-arg type="java.lang.String" value="isosceles"/>
+    </bean>
+    
+    
+    <!-- 5. Alternativamente se pueden colocar los beans que sean específicos de otros dentro de campos property, y no dejarlos fuera -->
+    <bean id="pointTriangleAdHoc" class="org.roka9.spring.Triangle">
+    	<!-- Lo haremos con inyección de dependencias por parámetro -->
+    	<property name="pointA" ref="firstPoint"/>
+    	<property name="pointB"> 
+    		<!-- No es necesario especificar ID -->
+    	   	<bean class="org.roka9.spring.Point">
+		   		<property name="x" value="11"/>
+		   		<property name="y" value="0"/>
+		   	</bean>
+   	    </property>
+   	    
+   	    <property name="pointC">
+		   	<bean class="org.roka9.spring.Point">
+		   		<property name="x" value="21"/>
+		   		<property name="y" value="0"/>
+		   	</bean> 	
+       	</property>
+    	
+    	<!-- Como no teneoms constructor por defecto, es necesario proporcionar argumentos para algún constructor -->
+    	<constructor-arg type="java.lang.String" value="isosceles"/>
+    </bean>
+    
+    <!-- 6. Inicializar un bean con inyección de dependencias a una lista de beans. Estos beans se referencian a los puntos que hemos definido -->
+   	<bean id="pointTriangleList" class="org.roka9.spring.Triangle">
+    	<!-- Lo haremos con inyección de dependencias por parámetro -->
+    	<property name="points">
+    		<list>
+    			<ref bean="firstPoint"/>
+    			<ref bean="secondPoint"/>
+    			<ref bean="thirdPoint"/>
+    		</list>
+    	</property>
+    	<!-- Como no teneoms constructor por defecto, es necesario proporcionar argumentos para algún constructor -->
+    	<constructor-arg type="java.lang.String" value="isosceles"/>
+    </bean>
+    
+    <!-- 7. Auto wiring: Se ligan los beans definidos abajo con los miembros de las clases. Para ello, los beans definidos deben tener el mismo nombre que las variables. -->
+   	<bean id="pointTriangleAutoWire" class="org.roka9.spring.Triangle" autowire="byName">
+
+    	<!-- Como no teneoms constructor por defecto, es necesario proporcionar argumentos para algún constructor -->
+    	<constructor-arg type="java.lang.String" value="isosceles"/>
+    </bean>
+    
+    <!-- Para autowire es necesario dar unos ids iguales a los nombres de los miembros de las clases sobre los que se va a aplicar la relación.
+    	 También se puede hacer byType, pero tendríamos que tener sólo un conjunto de Beans del mismo tipo definido. En nuestro caso no funciona.
+   		 Existe la posibilidad de hacerlo por constructor con la opción constructor, en vez de inyectar por parámetro, se hace por constructor.
+    -->
+    <bean id="pointA" class="org.roka9.spring.Point">
+   		<property name="x" value="0"/>
+   		<property name="y" value="0"/>
+   	</bean>
+   	
+   	<bean id="pointB" class="org.roka9.spring.Point">
+   		<property name="x" value="12"/>
+   		<property name="y" value="0"/>
+   	</bean>
+   	
+   	<bean id="pointC" class="org.roka9.spring.Point">
+   		<property name="x" value="22"/>
+   		<property name="y" value="0"/>
+   	</bean>
+    
+    
+   	<!-- Se crean los objetos Point, 3 por ser un triángulo -->
+   	<bean id="firstPoint" class="org.roka9.spring.Point">
+   		<property name="x" value="0"/>
+   		<property name="y" value="0"/>
+   	</bean>
+   	
+   	<bean id="secondPoint" class="org.roka9.spring.Point">
+   		<property name="x" value="10"/>
+   		<property name="y" value="0"/>
+   	</bean>
+   	
+   	<bean id="thirdPoint" class="org.roka9.spring.Point">
+   		<property name="x" value="20"/>
+   		<property name="y" value="0"/>
+   	</bean>
+   	
+   	<!-- Se pueden crear alias para cualquier bean. De esta forma, se puede llamar a un bean de distintas maneras -->
+   	<alias name="pointTriangleAdHoc" alias="pointTAH"/>
+   	
+
+
 </beans>
